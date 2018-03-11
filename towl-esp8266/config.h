@@ -6,7 +6,7 @@
 // HOMESSID must be set the same as in your Oak firmware for OTA to work.
 // Comment these out for most other generic ESP8266 boards.
 //#define OAK
-//#define HOMESSID "Linksys"
+#define HOMESSID "Linksys"
 // --- End Digistump Oak Config ---
 
 //  The queries are sent in the form of S-{BASE32}.DEVICE_ID.SUBDOMAIN
