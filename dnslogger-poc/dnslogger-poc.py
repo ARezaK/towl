@@ -14,7 +14,7 @@ import struct
 # Port to listen on.  I use a high port to run as a non-root user and then
 # map to it in iptables.  Alternatively change to port 53 and run as root.
 PORT = 53
-SUBDOMAIN = '.towl.areza.win'
+SUBDOMAIN = '.towl.areza.win.'
 LOGDIR = '/var/tmp'
 
 
@@ -44,12 +44,12 @@ def parseCovert(devid, data):
 
         if t == 'telem':
             print 'len: %d' % len(res)
-            tm, lat, lon, spd, = struct.unpack('IiiBBBB', res)
+            tm, lat, lon, spd = struct.unpack('Iddd', res)
             print 'Decoded telem: %d %d %d %d' % (tm, lat, lon, spd)
-            lf.write('%s,%d,%f,%f,%d,%d,%d\n' % (datetime.datetime.now(), tm,
-                                                 lat / 1000000.0, lon / 1000000.0,
-                                                 spd, sats, mode))
-            return tm
+            lf.write('%s,%d,%f,%f,%d,\n' % (datetime.datetime.now(), tm,
+                                                 lat, lon ,
+                                                 spd))
+            return spd
 
         print 'Decoded: %s' % res
         lf.write('%s : %s\n' % (datetime.datetime.now(), res))
@@ -70,13 +70,16 @@ def dns_response(data):
     print "qt is %s, qn is %s" % (qt, qn)
 
     if qt == 'A' and qn.lower().endswith(SUBDOMAIN):
+	print("here1")
         devid = qn.lower().split('.')[1]
         # Sanity check: devid must be xnn where x = letter and n = number
         if len(devid) != 3:
+            print('len of devid is not 3')
             return
         if (devid[0] not in string.letters or
                     devid[1] not in string.digits or
                     devid[2] not in string.digits):
+            print("something devid is not good")
             return
         rIP = '10.0.11.%d' % parseCovert(devid, qn)
         reply.add_answer(
