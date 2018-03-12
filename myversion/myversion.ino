@@ -4,16 +4,12 @@
 #include <Time.h>
 #include <Base32.h>
 #include <ESP8266WiFi.h>
-/*
-   This sample sket2ch demonstrates the normal use of a TinyGPS++ (TinyGPSPlus) object.
-   It requires the use of SoftwareSerial, and assumes that you have a
-   4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
-*/
+
 static const int RXPin = 12, TXPin = 13;
 static const uint32_t GPSBaud = 9600;
 
 // TSTORE_SZ = max number of telemetry entries to backlog
-#define TSTORE_SZ 100  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
+#define TSTORE_SZ 50  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
 
 
 #define DEVICE_ID "a01"
@@ -68,18 +64,22 @@ void loop()
   res = 0;
   while (ss.available() > 0)
     if (gps.encode(ss.read()))
-      if (gps.location.isValid()) {
+      if (gps.location.isValid() && gps.time.isValid()) {
         displayInfo();
         currentpos = getTelem();
         // store it
         storeTelem(currentpos);
 
         // if connect AP is good send out some telemtery
-        if (connectAP() == 1) Serial.println("enabling this causes crash");//sendStoredTelem();
+        if (connectAP() == 1) {
+          //Serial.println("enabling this causes crash");
+          sendStoredTelem();
+        }
 
       }
       else {
         Serial.println(F("INVALID Location AND OR TIME"));
+        displayInfo();
       }
 
 
@@ -93,7 +93,7 @@ uint16_t findSlot() {
   // Find a memory slot that is empty or at a higher time
   // resolution than the current object.
   uint16_t i;
-  for (i = 0; i < TSTORE_SZ-1; i++) {
+  for (i = 0; i < TSTORE_SZ - 1; i++) {
     if (tstore[i].tstamp == 0) {
       tstore[i + 1].tstamp = 0; // make the buffer slot above this one empty
       return i;  // Return the empty slot
@@ -121,7 +121,7 @@ void storeTelem(struct telem *tdata) {
 
 uint8_t sendStoredTelem() {
   uint8_t i, res = 0;
-  for(i=0; i < TSTORE_SZ; i++) {
+  for (i = 0; i < TSTORE_SZ; i++) {
     if (tstore[i].tstamp != 0) {
       res = sendDNSTelem(&tstore[i]);
       if (res == 1) tstore[i].tstamp = 0;
@@ -132,7 +132,7 @@ uint8_t sendStoredTelem() {
 }
 
 uint8_t sendDNSTelem(struct telem *tdata) {
-  IPAddress qresponse = {0,0,0,0};
+  IPAddress qresponse = {0, 0, 0, 0};
   char query[127];
   unsigned int outlen;
   byte *b32string;
@@ -140,7 +140,7 @@ uint8_t sendDNSTelem(struct telem *tdata) {
   memset(query, '\0', sizeof(query));
   outlen = base32.toBase32((byte*)tdata, sizeof(struct telem), b32string, false);
   strcat(query, "S-");
-  strncpy(query+2, (char*)b32string, outlen);
+  strncpy(query + 2, (char*)b32string, outlen);
   strcat(query, ".");
   strcat(query, DEVICE_ID);
   strcat(query, ".");
@@ -148,7 +148,11 @@ uint8_t sendDNSTelem(struct telem *tdata) {
   free(b32string);  // Got malloc()'d inside base32.toBase32()
 
   WiFi.hostByName(query, qresponse);
-  if (qresponse[0] == 10 && qresponse[3] == tdata->tstamp) {
+  Serial.println("qresponse");
+  Serial.println(qresponse[0]);
+  Serial.println(qresponse[3]);
+  Serial.println(tdata->spd);
+  if (qresponse[0] == 10 && (int) qresponse[3] == (int) tdata->spd) {
     Serial.println("Telemetry ACK");
     return 1;
   }
@@ -194,9 +198,9 @@ int connectAP() {
     WiFi.disconnect();
     WiFi.persistent(false);
 
-    wstatus = WiFi.begin(wSSID, NULL, 0, NULL, true);
-
-    for (uint8_t i = 0; i < 65; i++) {
+    //wstatus = WiFi.begin(wSSID, NULL, 0, NULL, true);
+    wstatus = WiFi.begin(wSSID, NULL);
+    for (uint8_t i = 0; i < 130; i++) {
       if (wstatus == WL_CONNECTED) {
         Serial.print(". connected. ");
         Serial.println(i * 100);
@@ -206,8 +210,10 @@ int connectAP() {
         Serial.println(". connect failed.");
         return 0;
       }
-
+      delay(400);
+   
       wstatus = WiFi.status();
+      //Serial.println(wstatus);
     }
     Serial.println(". timeout.");
   }
@@ -216,7 +222,6 @@ int connectAP() {
 
 struct telem *getTelem() {
   struct telem *tdata = new struct telem;
-
 
   tdata->tstamp = now();
   tdata->lat = gps.location.lat();
@@ -276,3 +281,4 @@ void displayInfo()
 
   Serial.println();
 }
+
