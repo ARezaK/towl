@@ -13,13 +13,11 @@ static const int RXPin = 12, TXPin = 13;
 static const uint32_t GPSBaud = 9600;
 
 // TSTORE_SZ = max number of telemetry entries to backlog
-#define TSTORE_SZ 50  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
+#define TSTORE_SZ 100  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
 
-// MAX_INTERVAL : Highest interval to track in 10 sec increments. (6 = 1 min)
-#define MAX_INTERVAL 18
 
 #define DEVICE_ID "a01"
-#define SUBDOMAIN "foobar.example.com"
+#define SUBDOMAIN "towl.areza.win"
 
 
 // The TinyGPS++ object
@@ -77,7 +75,7 @@ void loop()
         storeTelem(currentpos);
 
         // if connect AP is good send out some telemtery
-        if (connectAP() == 1) Serial.println("Connected");
+        if (connectAP() == 1) sendStoredTelem();
 
       }
       else {
