@@ -17,42 +17,43 @@ PORT = 5300
 SUBDOMAIN = '.foobar.example.com.'
 LOGDIR = '/var/tmp'
 
+
 def parseCovert(devid, data):
-  dstr = data.upper().split('.')[0]
-  print "dstr: %s" % dstr
-  if dstr.startswith('L-'):
-    dstr = dstr[2:]
-    t = 'long'
-  elif dstr.startswith('S-'):
-    dstr = dstr[2:]
-    t = 'telem'
-  else:
-    t = 'str'
+    dstr = data.upper().split('.')[0]
+    print "dstr: %s" % dstr
+    if dstr.startswith('L-'):
+        dstr = dstr[2:]
+        t = 'long'
+    elif dstr.startswith('S-'):
+        dstr = dstr[2:]
+        t = 'telem'
+    else:
+        t = 'str'
 
-  plen = len(dstr) % 8
-  if plen:
-    dstr = dstr + '=' * (8 - plen)
-  res = base64.b32decode(dstr)
+    plen = len(dstr) % 8
+    if plen:
+        dstr = dstr + '=' * (8 - plen)
+    res = base64.b32decode(dstr)
 
-  with open(LOGDIR + '/%s.log' % devid, 'a') as lf:
-    if t == 'long':
-      res = struct.unpack('>i', res)[0]
-      print 'Decoded long: %d' % res
-      lf.write('%s : %d\n' % (datetime.datetime.now(), res))
-      return 99
+    with open(LOGDIR + '/%s.log' % devid, 'a') as lf:
+        if t == 'long':
+            res = struct.unpack('>i', res)[0]
+            print 'Decoded long: %d' % res
+            lf.write('%s : %d\n' % (datetime.datetime.now(), res))
+            return 99
 
-    if t == 'telem':
-      print 'len: %d' % len(res)
-      tm,lat,lon,spd,sats,id,mode = struct.unpack('IiiBBBB', res)
-      print 'Decoded telem: %d %d %d %d' % (tm, lat, lon, spd)
-      lf.write('%s,%d,%f,%f,%d,%d,%d\n' % (datetime.datetime.now(), tm,
-                                        lat/1000000.0, lon/1000000.0,
-                                        spd, sats, mode))
-      return id
+        if t == 'telem':
+            print 'len: %d' % len(res)
+            tm, lat, lon, spd, = struct.unpack('IiiBBBB', res)
+            print 'Decoded telem: %d %d %d %d' % (tm, lat, lon, spd)
+            lf.write('%s,%d,%f,%f,%d,%d,%d\n' % (datetime.datetime.now(), tm,
+                                                 lat / 1000000.0, lon / 1000000.0,
+                                                 spd, sats, mode))
+            return tm
 
-    print 'Decoded: %s' % res
-    lf.write('%s : %s\n' % (datetime.datetime.now(), res))
-    return len(res)
+        print 'Decoded: %s' % res
+        lf.write('%s : %s\n' % (datetime.datetime.now(), res))
+        return len(res)
 
 
 def dns_response(data):
@@ -69,22 +70,21 @@ def dns_response(data):
     print "qt is %s, qn is %s" % (qt, qn)
 
     if qt == 'A' and qn.lower().endswith(SUBDOMAIN):
-      devid = qn.lower().split('.')[1]
-      # Sanity check: devid must be xnn where x = letter and n = number
-      if len(devid) != 3:
-        return
-      if (devid[0] not in string.letters or
-          devid[1] not in string.digits or
-          devid[2] not in string.digits):
-          return
-      rIP = '10.0.11.%d' % parseCovert(devid, qn)
-      reply.add_answer(
-          RR(rname=qname, rtype=QTYPE.A, rclass=1, ttl=300, rdata=A(rIP)))
+        devid = qn.lower().split('.')[1]
+        # Sanity check: devid must be xnn where x = letter and n = number
+        if len(devid) != 3:
+            return
+        if (devid[0] not in string.letters or
+                    devid[1] not in string.digits or
+                    devid[2] not in string.digits):
+            return
+        rIP = '10.0.11.%d' % parseCovert(devid, qn)
+        reply.add_answer(
+            RR(rname=qname, rtype=QTYPE.A, rclass=1, ttl=300, rdata=A(rIP)))
     return reply.pack()
 
 
 class BaseRequestHandler(SocketServer.BaseRequestHandler):
-
     def get_data(self):
         raise NotImplementedError
 
@@ -94,17 +94,16 @@ class BaseRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         now = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
         print "\n\n%s request %s (%s %s):" % (self.__class__.__name__[:3], now, self.client_address[0],
-                                               self.client_address[1])
+                                              self.client_address[1])
         try:
             data = self.get_data()
-            #print len(data), data.encode('hex')  # repr(data).replace('\\x', '')[1:-1]
+            # print len(data), data.encode('hex')  # repr(data).replace('\\x', '')[1:-1]
             self.send_data(dns_response(data))
         except Exception:
             traceback.print_exc(file=sys.stderr)
 
 
 class TCPRequestHandler(BaseRequestHandler):
-
     def get_data(self):
         data = self.request.recv(8192).strip()
         sz = int(data[:2].encode('hex'), 16)
@@ -120,7 +119,6 @@ class TCPRequestHandler(BaseRequestHandler):
 
 
 class UDPRequestHandler(BaseRequestHandler):
-
     def get_data(self):
         return self.request[0].strip()
 

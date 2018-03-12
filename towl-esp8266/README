@@ -3,6 +3,9 @@ Used ESP8266
 and this module
 https://www.ebay.com/itm/VK2828U7G5LF-Ublox-GPS-Module-FLASH-Flight-Controller-W-Antenna-TTL-1-10Hz/272786136744?ssPageName=STRK%3AMEBIDX%3AIT&_trksid=p2060353.m2749.l2649
 
+Installed base32 module from here https://github.com/NetRat/Base32 . Download zip and install library from zip using arduino software
+Instaled tinygps (instaed of tinygps++)  https://github.com/mikalhart/TinyGPS  Download zip and install library from zip using arduino software
+
 Connect power, and ground and Connect the TX pin of the GPS to the D6 pin of the ESP (the Blue wire)
 
 Takes about 2 minutes for it to startup and you have to be close to a window.
