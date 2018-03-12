@@ -75,7 +75,7 @@ void loop()
         storeTelem(currentpos);
 
         // if connect AP is good send out some telemtery
-        if (connectAP() == 1) sendStoredTelem();
+        if (connectAP() == 1) Serial.println("enabling this causes crash");//sendStoredTelem();
 
       }
       else {
