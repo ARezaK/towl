@@ -5,11 +5,13 @@
 #include <Base32.h>
 #include <ESP8266WiFi.h>
 
+// need to decrease delay when trying to connect to a wifi network, increase TSTORZE_SZ, add a delay betwen getting measurments?
+
 static const int RXPin = 12, TXPin = 13;
 static const uint32_t GPSBaud = 9600;
 
 // TSTORE_SZ = max number of telemetry entries to backlog
-#define TSTORE_SZ 50  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
+#define TSTORE_SZ 70  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
 
 
 #define DEVICE_ID "a01"
@@ -75,7 +77,7 @@ void loop()
           //Serial.println("enabling this causes crash");
           sendStoredTelem();
         }
-
+      delay(500);
       }
       else {
         Serial.println(F("INVALID Location AND OR TIME"));
@@ -200,7 +202,7 @@ int connectAP() {
 
     //wstatus = WiFi.begin(wSSID, NULL, 0, NULL, true);
     wstatus = WiFi.begin(wSSID, NULL);
-    for (uint8_t i = 0; i < 130; i++) {
+    for (uint8_t i = 0; i < 100; i++) {
       if (wstatus == WL_CONNECTED) {
         Serial.print(". connected. ");
         Serial.println(i * 100);
@@ -210,7 +212,7 @@ int connectAP() {
         Serial.println(". connect failed.");
         return 0;
       }
-      delay(400);
+      delay(100);
    
       wstatus = WiFi.status();
       //Serial.println(wstatus);
@@ -281,4 +283,5 @@ void displayInfo()
 
   Serial.println();
 }
+
 
