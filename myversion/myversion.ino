@@ -5,7 +5,7 @@
 #include <Base32.h>
 #include <ESP8266WiFi.h>
 
-// need to decrease delay when trying to connect to a wifi network, increase TSTORZE_SZ, add a delay betwen getting measurments?
+// irease TSTORZE_SZ, add a delay betwen getting measurments, add a delay between checking for GPS signal. If it takes longer than 5 minutes reset the esp.
 
 static const int RXPin = 12, TXPin = 13;
 static const uint32_t GPSBaud = 9600;
