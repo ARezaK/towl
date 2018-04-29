@@ -1,5 +1,5 @@
 My notes:
-Used ESP8266
+Used ESP8266 initially but for wifi range i used wemos d1 mini pro
 and this module
 https://www.ebay.com/itm/VK2828U7G5LF-Ublox-GPS-Module-FLASH-Flight-Controller-W-Antenna-TTL-1-10Hz/272786136744?ssPageName=STRK%3AMEBIDX%3AIT&_trksid=p2060353.m2749.l2649
 
