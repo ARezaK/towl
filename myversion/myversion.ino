@@ -11,7 +11,7 @@ static const int RXPin = 12, TXPin = 13;
 static const uint32_t GPSBaud = 9600;
 
 // TSTORE_SZ = max number of telemetry entries to backlog
-#define TSTORE_SZ 150  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
+#define TSTORE_SZ 250  // VANDER - WHATS MAX SIZE? I ThINK each entry is 28 bytes
 
 
 #define DEVICE_ID "a01"
