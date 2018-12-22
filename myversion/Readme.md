@@ -9,7 +9,7 @@ and this https://github.com/PaulStoffregen/Time
 I could only get this to work w/ esp8266 board version 2.3.0 (selected via board manager in arduino)
 setup dnslogger-Poc on your server
 
-Connect power, and ground and Connect the TX pin of the GPS to the D6 pin of the ESP (the Blue wire)
+Connect power (5V), and ground and Connect the TX pin of the GPS to the D6 pin of the ESP (the Blue wire)
 
 Takes about 2 minutes for it to startup and you have to be close to a window.
 
