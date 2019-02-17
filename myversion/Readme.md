@@ -26,3 +26,6 @@ https://www.darrinward.com/lat-long/
 Use this to extract from log
 cat a01.log | cut -d ',' -f3,4,5
 
+
+setting up networking on digitalocean
+https://gyazo.com/2d39fcdbe8c663b8ba61023c195601ae
